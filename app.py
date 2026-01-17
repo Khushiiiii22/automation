@@ -1,6 +1,6 @@
 """
-Professional Appointment Booking Automation System
-Web-based interface for easy configuration and execution
+Appointment Booking Automation System
+Web interface for booking appointments
 """
 
 from flask import Flask, render_template, request, jsonify, session
@@ -33,7 +33,7 @@ logging.basicConfig(
 
 
 class BookingAutomation:
-    """Professional booking automation handler"""
+    """Booking automation handler"""
     
     def __init__(self, headless=False):
         self.driver = None
@@ -70,13 +70,12 @@ class BookingAutomation:
             return False
     
     def navigate_to_website(self, url):
-        """Navigate to target website"""
+        """Navigate to website"""
         try:
             self.log_status(f"🌐 Navigating to {url}")
             self.driver.get(url)
             time.sleep(2)
             
-            # Check if page loaded successfully
             current_url = self.driver.current_url
             page_title = self.driver.title
             
@@ -90,7 +89,6 @@ class BookingAutomation:
         except Exception as e:
             error_msg = str(e)
             
-            # Provide user-friendly error messages
             if "ERR_INTERNET_DISCONNECTED" in error_msg:
                 self.log_status(f"❌ No internet connection. Please check your network and try again.", "error")
             elif "ERR_NAME_NOT_RESOLVED" in error_msg:
@@ -165,7 +163,6 @@ class BookingAutomation:
         # Try by placeholder or label text for input fields
         if field_type not in ['login_button', 'submit_button']:
             try:
-                # Try finding by placeholder
                 element = self.driver.find_element(By.XPATH, f"//input[contains(@placeholder, '{field_type}')]")
                 if element:
                     return element
@@ -176,7 +173,6 @@ class BookingAutomation:
     
     def smart_find_button(self, button_texts, timeout=10):
         """Find button by text or common patterns"""
-        # Try finding by visible text
         for text in button_texts:
             try:
                 element = self.driver.find_element(By.XPATH, f"//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{text.lower()}')]")
@@ -256,49 +252,38 @@ class BookingAutomation:
         try:
             self.log_status("🚀 Starting booking automation")
             
-            # VPN Check Message
-            self.log_status("🔐 IMPORTANT: Make sure you're connected to a Korean VPN!")
-            self.log_status("⏸️ Waiting 10 seconds for you to connect to VPN...")
+            self.log_status("🔐 IMPORTANT: Please wait...")
+            self.log_status("⏸️ Initializing...")
             time.sleep(10)
             
-            # Check internet connectivity first
             if not self.check_internet_connection(booking_data['website_url']):
-                return False, "No internet connection. Please check your network and VPN."
+                return False, "No internet connection. Please check your network."
             
-            # Navigate to website
             self.log_status("� Attempting to load website...")
             if not self.navigate_to_website(booking_data['website_url']):
                 return False, "Failed to load website. Check your connection!"
             
-            # Wait longer for page to fully load
             self.log_status("⏳ Waiting for page to load completely...")
-            time.sleep(5)  # Give JavaScript time to render
             
-            # Check if it's a real error page by looking at title
             page_title = self.driver.title
             page_source = self.driver.page_source
             
-            # IMPROVED: Check for actual 404 error page (not just "404" in text)
             is_error_page = False
             if "404 Error Page" in page_title or "에러페이지" in page_title:
                 is_error_page = True
             elif "404 Error Page" in page_source and len(page_source) < 50000:
-                # Short page with "404 Error Page" is likely actual error
                 is_error_page = True
             
             if is_error_page:
                 self.log_status("❌ Website showing 404 error page!", "error")
                 self.take_screenshot('error_404_page.png')
-                return False, "❌ Website shows 404 error! Make sure you're connected to Korean VPN. Try: 1) Connect VPN to Korea 2) Restart automation"
+                return False, "❌ Website shows 404 error! Please check your connection and try again"
             
-            # Take screenshot of login page
             self.take_screenshot('login_page.png')
             self.log_status(f"✅ Page loaded: {page_title}")
             
-            # Step 1: Login
             self.log_status("🔐 Logging in...")
             
-            # Find and fill login ID
             login_field = self.smart_find_field('login_id')
             if login_field:
                 login_field.clear()
@@ -308,7 +293,6 @@ class BookingAutomation:
                 time.sleep(1)
             else:
                 self.log_status("⚠️ Login ID field not found - trying alternative methods...", "warning")
-                # Try finding by placeholder text
                 try:
                     login_field = self.driver.find_element(By.XPATH, "//input[@type='text' or @type='email']")
                     if login_field:
@@ -319,7 +303,6 @@ class BookingAutomation:
                 except:
                     self.log_status("❌ Could not find login ID field", "error")
             
-            # Find and fill password
             password_field = self.smart_find_field('password')
             if password_field:
                 password_field.clear()
@@ -329,7 +312,6 @@ class BookingAutomation:
                 time.sleep(1)
             else:
                 self.log_status("⚠️ Password field not found - trying alternative methods...", "warning")
-                # Try finding by type='password'
                 try:
                     password_field = self.driver.find_element(By.XPATH, "//input[@type='password']")
                     if password_field:
@@ -340,7 +322,6 @@ class BookingAutomation:
                 except:
                     self.log_status("❌ Could not find password field", "error")
             
-            # Take screenshot before clicking login
             self.take_screenshot('before_login.png')
             
             # Find and click login button
@@ -369,7 +350,6 @@ class BookingAutomation:
                 self.log_status("❌ Login button not found - Please check the screenshot", "error")
                 self.take_screenshot('login_button_not_found.png')
             
-            # Step 2: Auto-select Embassy
             embassy_field = self.smart_find_field('embassy')
             if embassy_field and booking_data.get('embassy'):
                 self.log_status(f"🏛️ Selecting embassy: {booking_data['embassy']}")
@@ -381,7 +361,6 @@ class BookingAutomation:
                 except Exception as e:
                     self.log_status(f"⚠️ Embassy selection: {str(e)}", "warning")
             
-            # Step 3: Select Document Authentication service
             service_field = self.smart_find_field('service')
             if service_field:
                 self.log_status("📄 Selecting service type...")
@@ -401,7 +380,6 @@ class BookingAutomation:
                 except Exception as e:
                     self.log_status(f"⚠️ Service selection: {str(e)}", "warning")
             
-            # Step 4: Select Date and Time
             date_field = self.smart_find_field('date')
             if date_field and booking_data.get('date'):
                 self.log_status("📅 Selecting appointment date...")
@@ -416,7 +394,6 @@ class BookingAutomation:
                 time_field.send_keys(booking_data['time'])
                 self.log_status("✅ Time entered")
             
-            # Step 5: Enter passport number
             passport_field = self.smart_find_field('passport')
             if passport_field and booking_data.get('passport_number'):
                 self.log_status("🛂 Entering passport number...")
@@ -424,12 +401,10 @@ class BookingAutomation:
                 passport_field.send_keys(booking_data['passport_number'])
                 self.log_status("✅ Passport number entered")
             
-            # Step 6: CAPTCHA handling
             self.log_status("🔐 Please complete CAPTCHA if present...")
             self.log_status("⏸️ Waiting 60 seconds for manual CAPTCHA completion...")
             time.sleep(60)
             
-            # Step 7: Select notification preferences
             self.log_status("📧 Setting notification preferences...")
             
             if booking_data.get('notify_email'):
@@ -476,7 +451,6 @@ class BookingAutomation:
             # Take pre-submit screenshot
             self.take_screenshot('pre_submit.png')
             
-            # Step 8: Final submit
             self.log_status("🎯 Submitting booking confirmation...")
             
             submit_button = self.smart_find_button(['submit', 'confirm', 'book', 'reserve', '제출', '확인'])
