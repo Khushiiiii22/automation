@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Booking Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .hint {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-section.active {
+            display: block;
+        }
+
+        .status-log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .status-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-left: 3px solid #667eea;
+            background: #f9f9f9;
+        }
+
+        .status-item.error {
+            border-left-color: #e74c3c;
+        }
+
+        .status-item.warning {
+            border-left-color: #f39c12;
+        }
+
+        .status-time {
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .error-detail {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Appointment Booking Automation</h1>
+            <p>Professional automated booking system</p>
+        </div>
+
+        <div class="content">
+            <div class="warning-box" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+                <strong style="color: #856404;">⚠️ IMPORTANT: VPN Required!</strong>
+                <p style="color: #856404; margin-top: 10px; margin-bottom: 0;">
+                    The Korean government website (g4k.go.kr) may only be accessible from Korea. 
+                    <strong>Connect to a Korean VPN before starting the automation</strong> to avoid 404 errors.
+                </p>
+            </div>
+
+            <form id="bookingForm">
+                <!-- Website Information -->
+                <div class="section">
+                    <h2 class="section-title">🌐 Website Information</h2>
+                    <div class="form-group full-width">
+                        <label>Website URL *</label>
+                        <input type="url" id="website_url" required placeholder="https://www.g4k.go.kr/cipl/0100/login.do" value="https://www.g4k.go.kr/cipl/0100/login.do">
+                        <div class="hint">Start with the login page - system will handle navigation</div>
+                    </div>
+                </div>
+
+                <!-- Login Credentials -->
+                <div class="section">
+                    <h2 class="section-title">🔐 Login Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Login ID *</label>
+                            <input type="text" id="login_id" required placeholder="Your Login ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" id="password" required placeholder="Your Password">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Information -->
+                <div class="section">
+                    <h2 class="section-title">👤 Student Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Student Name *</label>
+                            <input type="text" id="name" required placeholder="Student Full Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Passport Number *</label>
+                            <input type="text" id="passport_number" required placeholder="Passport Number">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="email" required placeholder="student@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="phone" required placeholder="+82 10-1234-5678">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment Details -->
+                <div class="section">
+                    <h2 class="section-title">📅 Appointment Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Embassy Location *</label>
+                            <input type="text" id="embassy" required placeholder="e.g., Seoul Embassy">
+                            <div class="hint">Will be auto-selected after login</div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Service Type *</label>
+                            <select id="service_type" required>
+                                <option value="">Select Service</option>
+                                <option value="document_authentication" selected>Document Authentication</option>
+                                <option value="other">Other Service</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Appointment Date *</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Appointment Time *</label>
+                            <input type="time" id="time" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="section">
+                    <h2 class="section-title">📧 Notification Preferences</h2>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="notify_email" checked style="width: auto;">
+                            Email Notification
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="notify_sms" checked style="width: auto;">
+                            SMS Notification
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🚀 Start Booking Automation
+                </button>
+            </form>
+
+            <!-- Status Section -->
+            <div class="status-section" id="statusSection">
+                <h3>📊 Automation Status</h3>
+                <div id="resultMessage"></div>
+                <div class="status-log" id="statusLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const statusSection = document.getElementById('statusSection');
+            const statusLog = document.getElementById('statusLog');
+            const resultMessage = document.getElementById('resultMessage');
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Processing...';
+
+            // Show status section
+            statusSection.classList.add('active');
+            statusLog.innerHTML = '<div class="loader"></div>';
+            resultMessage.innerHTML = '';
+
+            // Collect form data
+            const formData = {
+                website_url: document.getElementById('website_url').value,
+                login_id: document.getElementById('login_id').value,
+                password: document.getElementById('password').value,
+                name: document.getElementById('name').value,
+                passport_number: document.getElementById('passport_number').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                embassy: document.getElementById('embassy').value,
+                service_type: document.getElementById('service_type').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                notify_email: document.getElementById('notify_email').checked,
+                notify_sms: document.getElementById('notify_sms').checked
+            };
+
+            try {
+                const response = await fetch('/start_booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                // Display result
+                if (result.success) {
+                    resultMessage.innerHTML = `<div class="success-message">✅ ${result.message}</div>`;
+                } else {
+                    let errorHelp = '';
+                    const msg = result.message.toLowerCase();
+                    
+                    // Provide context-specific help
+                    if (msg.includes('internet') || msg.includes('network') || msg.includes('disconnected')) {
+                        errorHelp = `<div class="error-detail">💡 <strong>Tip:</strong> Check your internet connection and try again. Make sure you can access the website in Chrome first.</div>`;
+                    } else if (msg.includes('cannot find') || msg.includes('not resolved')) {
+                        errorHelp = `<div class="error-detail">💡 <strong>Tip:</strong> Verify the URL is correct. Try opening it in your browser first.</div>`;
+                    } else if (msg.includes('refused')) {
+                        errorHelp = `<div class="error-detail">💡 <strong>Tip:</strong> The website may be down or blocking automated access. Try again later.</div>`;
+                    } else if (msg.includes('timeout')) {
+                        errorHelp = `<div class="error-detail">💡 <strong>Tip:</strong> The website is taking too long to respond. Check your connection or try again later.</div>`;
+                    } else if (msg.includes('element') || msg.includes('field')) {
+                        errorHelp = `<div class="error-detail">💡 <strong>Tip:</strong> Check that field IDs are correct using Chrome's Inspect tool (Right-click → Inspect).</div>`;
+                    }
+                    
+                    resultMessage.innerHTML = `<div class="error-message">❌ ${result.message}${errorHelp}</div>`;
+                }
+
+                // Display status log
+                statusLog.innerHTML = '';
+                result.status.forEach(item => {
+                    const statusItem = document.createElement('div');
+                    statusItem.className = `status-item ${item.level}`;
+                    statusItem.innerHTML = `<span class="status-time">${item.time}</span>${item.message}`;
+                    statusLog.appendChild(statusItem);
+                });
+
+            } catch (error) {
+                resultMessage.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Start Booking Automation';
+            }
+        });
+    </script>
+</body>
+</html>
