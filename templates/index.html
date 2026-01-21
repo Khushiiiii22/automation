@@ -313,6 +313,13 @@
                 <button type="submit" class="submit-btn" id="submitBtn">
                     🚀 Start Booking Automation
                 </button>
+
+                <button type="button" class="submit-btn" id="manualLoginBtn" style="background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%); margin-top: 15px;">
+                    👤 Manual Login + Auto Booking
+                </button>
+                <div class="hint" style="text-align: center; margin-top: 10px;">
+                    Use "Manual Login" if you want to login yourself, then automation will complete the booking
+                </div>
             </form>
 
             <!-- Status Section -->
@@ -407,6 +414,74 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = '🚀 Start Booking Automation';
+            }
+        });
+
+        // Manual Login Button Handler
+        document.getElementById('manualLoginBtn').addEventListener('click', async () => {
+            const manualLoginBtn = document.getElementById('manualLoginBtn');
+            const statusSection = document.getElementById('statusSection');
+            const statusLog = document.getElementById('statusLog');
+            const resultMessage = document.getElementById('resultMessage');
+
+            // Disable button
+            manualLoginBtn.disabled = true;
+            manualLoginBtn.textContent = '⏳ Opening browser...';
+
+            // Show status section
+            statusSection.classList.add('active');
+            statusLog.innerHTML = '<div class="loader"></div>';
+            resultMessage.innerHTML = '';
+
+            // Collect form data (only website URL needed for manual login)
+            const formData = {
+                website_url: document.getElementById('website_url').value,
+                login_id: '',  // Not needed for manual login
+                password: '',  // Not needed for manual login
+                name: document.getElementById('name').value,
+                passport_number: document.getElementById('passport_number').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                embassy: document.getElementById('embassy').value,
+                service_type: document.getElementById('service_type').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                notify_email: document.getElementById('notify_email').checked,
+                notify_sms: document.getElementById('notify_sms').checked
+            };
+
+            try {
+                const response = await fetch('/start_manual_login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                // Display result
+                if (result.success) {
+                    resultMessage.innerHTML = `<div class="success-message">✅ ${result.message}<br><small>Please check the browser window to verify the booking</small></div>`;
+                } else {
+                    resultMessage.innerHTML = `<div class="error-message">❌ ${result.message}</div>`;
+                }
+
+                // Display status log
+                statusLog.innerHTML = '';
+                result.status.forEach(item => {
+                    const statusItem = document.createElement('div');
+                    statusItem.className = `status-item ${item.level}`;
+                    statusItem.innerHTML = `<span class="status-time">${item.time}</span>${item.message}`;
+                    statusLog.appendChild(statusItem);
+                });
+
+            } catch (error) {
+                resultMessage.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+            } finally {
+                manualLoginBtn.disabled = false;
+                manualLoginBtn.textContent = '👤 Manual Login + Auto Booking';
             }
         });
     </script>

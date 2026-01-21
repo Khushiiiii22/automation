@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G4K Booking Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header .flag {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #2a5298;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+
+        .info-box strong {
+            color: #1e3c72;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-section.active {
+            display: block;
+        }
+
+        .status-log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .status-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-left: 3px solid #2a5298;
+            background: #f9f9f9;
+            font-size: 0.9em;
+        }
+
+        .status-item.error {
+            border-left-color: #e74c3c;
+        }
+
+        .status-item.warning {
+            border-left-color: #f39c12;
+        }
+
+        .status-time {
+            font-weight: 600;
+            color: #2a5298;
+            margin-right: 10px;
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .steps {
+            background: #fff9e6;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .steps h3 {
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+
+        .steps ol {
+            margin-left: 20px;
+        }
+
+        .steps li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="flag">🇰🇷</div>
+            <h1>G4K Booking Automation</h1>
+            <p>Overseas Koreans 365 Civil Complaint Portal</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <strong>📌 Website:</strong> g4k.go.kr<br>
+                <strong>🎯 Purpose:</strong> Automated login and reservation assistance<br>
+                <strong>⚠️ Note:</strong> Browser will stay open for manual completion after login
+            </div>
+
+            <div class="steps">
+                <h3>📋 What This Automation Does:</h3>
+                <ol>
+                    <li>Opens the G4K login page</li>
+                    <li>Fills in your credentials automatically</li>
+                    <li>Handles security codes (CAPTCHA) with pause for manual entry</li>
+                    <li>Logs you in automatically</li>
+                    <li>Takes you to the main page</li>
+                    <li><strong>You complete the reservation manually</strong> in the browser</li>
+                </ol>
+            </div>
+
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label>Login ID *</label>
+                    <input type="text" id="login_id" required placeholder="Your G4K Login ID">
+                    <div class="hint">Your registered ID on g4k.go.kr</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="password" required placeholder="Your Password">
+                    <div class="hint">Your account password</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🚀 Start Automated Login
+                </button>
+            </form>
+
+            <div class="status-section" id="statusSection">
+                <h3>📊 Automation Status</h3>
+                <div id="resultMessage"></div>
+                <div class="status-log" id="statusLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const statusSection = document.getElementById('statusSection');
+            const statusLog = document.getElementById('statusLog');
+            const resultMessage = document.getElementById('resultMessage');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Processing...';
+
+            statusSection.classList.add('active');
+            statusLog.innerHTML = '<div class="loader"></div>';
+            resultMessage.innerHTML = '';
+
+            const formData = {
+                login_id: document.getElementById('login_id').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch('/start_booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultMessage.innerHTML = `<div class="success-message">✅ ${result.message}<br><br>📝 The browser is still open - Please complete your reservation manually!</div>`;
+                } else {
+                    resultMessage.innerHTML = `<div class="error-message">❌ ${result.message}<br><br>💡 Check the screenshots in the static/screenshots folder for details.</div>`;
+                }
+
+                statusLog.innerHTML = '';
+                result.status.forEach(item => {
+                    const statusItem = document.createElement('div');
+                    statusItem.className = `status-item ${item.level}`;
+                    statusItem.innerHTML = `<span class="status-time">${item.time}</span>${item.message}`;
+                    statusLog.appendChild(statusItem);
+                });
+
+            } catch (error) {
+                resultMessage.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Start Automated Login';
+            }
+        });
+    </script>
+</body>
+</html>
